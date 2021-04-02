@@ -46,6 +46,6 @@ func main() {
 
 	for atomic.LoadUint64(&completed) < uint64(conns) {
 		log.Printf("Waiting on %d threads to complete\n", uint64(conns)-atomic.LoadUint64(&completed))
-		time.Sleep(100)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
