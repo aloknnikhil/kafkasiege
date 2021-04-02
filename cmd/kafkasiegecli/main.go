@@ -12,11 +12,13 @@ import (
 var (
 	brokerEP string
 	conns    uint
+	timeout  uint
 )
 
 func init() {
 	flag.StringVar(&brokerEP, "broker-endpoint", "", "Broker Endpoint (including port)")
 	flag.UintVar(&conns, "connections", 1, "No. of connections to launch a siege with")
+	flag.UintVar(&timeout, "connect-timeout", 1, "Connection timeout (in ms)")
 }
 
 func main() {
@@ -33,7 +35,7 @@ func main() {
 			defer func() {
 				atomic.AddUint64(&completed, 1)
 			}()
-			conn, err := net.Dial("tcp", brokerEP)
+			conn, err := net.DialTimeout("tcp", brokerEP, time.Millisecond*time.Duration(timeout))
 			if err != nil {
 				log.Printf("TCP dial error: %s\n", err.Error())
 				return
