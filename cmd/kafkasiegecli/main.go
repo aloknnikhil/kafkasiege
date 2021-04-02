@@ -23,6 +23,9 @@ func main() {
 
 	for i := uint(0); i < conns; i++ {
 		go func() {
+			defer func() {
+				atomic.AddUint64(&completed, 1)
+			}()
 			conn, err := net.Dial("tcp", brokerEP)
 			if err != nil {
 				log.Printf("TCP dial error: %s\n", err.Error())
@@ -31,7 +34,6 @@ func main() {
 			if err = conn.Close(); err != nil {
 				log.Printf("Connection close error: %s\n", err.Error())
 			}
-			atomic.AddUint64(&completed, 1)
 		}()
 	}
 
