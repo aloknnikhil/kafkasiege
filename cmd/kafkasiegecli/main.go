@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net"
+	"os"
 	"sync/atomic"
 	"time"
 )
@@ -19,6 +20,12 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
+	if len(brokerEP) == 0 {
+		flag.Usage()
+		os.Exit(-1)
+	}
+
 	completed := uint64(0)
 
 	for i := uint(0); i < conns; i++ {
