@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"sync/atomic"
@@ -50,6 +51,9 @@ func main() {
 				conn, err = net.DialTimeout("tcp", brokerEP, time.Millisecond*time.Duration(timeout))
 				if err != nil {
 					log.Printf("TCP dial error: %s\n", err.Error())
+					retryIn := rand.Intn(1000)
+					log.Printf("Will retry in %d ms\n", retryIn)
+					time.Sleep(time.Duration(retryIn) * time.Millisecond)
 					retries++
 				} else {
 					break
