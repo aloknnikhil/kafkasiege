@@ -28,26 +28,32 @@ func main() {
 		os.Exit(-1)
 	}
 
-	completed := uint64(0)
+	connected := uint64(0)
+	failed := uint64(0)
 
 	for i := uint(0); i < conns; i++ {
 		go func() {
-			defer func() {
-				atomic.AddUint64(&completed, 1)
-			}()
 			conn, err := net.DialTimeout("tcp", brokerEP, time.Millisecond*time.Duration(timeout))
 			if err != nil {
 				log.Printf("TCP dial error: %s\n", err.Error())
+				atomic.AddUint64(&failed, 1)
 				return
 			}
 			if err = conn.Close(); err != nil {
 				log.Printf("Connection close error: %s\n", err.Error())
+				atomic.AddUint64(&failed, 1)
+				return
 			}
+			atomic.AddUint64(&connected, 1)
 		}()
 	}
 
-	for atomic.LoadUint64(&completed) < uint64(conns) {
-		log.Printf("Waiting on %d threads to complete\n", uint64(conns)-atomic.LoadUint64(&completed))
+	total := uint64(0)
+	for total < uint64(conns) {
+		log.Printf("Waiting on %d threads to complete\n", uint64(conns)-total)
 		time.Sleep(100 * time.Millisecond)
+		total = atomic.LoadUint64(&connected) + atomic.LoadUint64(&failed)
 	}
+
+	log.Printf("Total: %d \t Success: %d \t Error: %d\n", conns, connected, failed)
 }
