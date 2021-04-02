@@ -13,12 +13,14 @@ var (
 	brokerEP string
 	conns    uint
 	timeout  uint
+	retries  uint
 )
 
 func init() {
 	flag.StringVar(&brokerEP, "broker-endpoint", "", "Broker Endpoint (including port)")
 	flag.UintVar(&conns, "connections", 1, "No. of connections to launch a siege with")
 	flag.UintVar(&timeout, "connect-timeout", 1, "Connection timeout (in ms)")
+	flag.UintVar(&retries, "retries", 1, "No. of connect retries")
 }
 
 func main() {
@@ -33,18 +35,32 @@ func main() {
 
 	for i := uint(0); i < conns; i++ {
 		go func() {
-			conn, err := net.DialTimeout("tcp", brokerEP, time.Millisecond*time.Duration(timeout))
-			if err != nil {
-				log.Printf("TCP dial error: %s\n", err.Error())
-				atomic.AddUint64(&failed, 1)
+			retryCount := uint(0)
+			var conn net.Conn
+			var err error
+			defer func() {
+				if err != nil {
+					atomic.AddUint64(&failed, 1)
+				} else {
+					atomic.AddUint64(&connected, 1)
+				}
+			}()
+
+			for retryCount <= retries {
+				conn, err = net.DialTimeout("tcp", brokerEP, time.Millisecond*time.Duration(timeout))
+				if err != nil {
+					log.Printf("TCP dial error: %s\n", err.Error())
+					retries++
+				}
+			}
+			if retryCount == retries && err != nil {
+				log.Println("Exhausted retries")
 				return
 			}
 			if err = conn.Close(); err != nil {
 				log.Printf("Connection close error: %s\n", err.Error())
-				atomic.AddUint64(&failed, 1)
 				return
 			}
-			atomic.AddUint64(&connected, 1)
 		}()
 	}
 
