@@ -51,6 +51,8 @@ func main() {
 				if err != nil {
 					log.Printf("TCP dial error: %s\n", err.Error())
 					retries++
+				} else {
+					break
 				}
 			}
 			if retryCount == retries && err != nil {
