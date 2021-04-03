@@ -1,0 +1,10 @@
+brokerEndpoint = "localhost:9092"
+connections = 2048
+timeout = 10
+retries = 1
+
+# TCP plugin config
+[[Plugin]]
+name = "tcp"
+path = "/Users/anikhil/kafkasiege/tcp.so"
+config = ""
