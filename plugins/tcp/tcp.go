@@ -85,7 +85,7 @@ func (t *TCP) Function() harness.Func {
 			}
 		}
 		if retryCount > t.harnessImpl.Config().Retries && err != nil {
-			log.Println("Exhausted retries")
+			log.Printf("[ID: %d] Exhausted retries\n", connectionId)
 			return
 		}
 		if err = conn.Close(); err != nil {
