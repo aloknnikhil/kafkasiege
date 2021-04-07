@@ -24,6 +24,16 @@ const (
 // Plugin - Exported reference to harness.Plugin implementation
 var Plugin Kafka
 
+var securityConfig kafka.ConfigMap = kafka.ConfigMap{
+	"security.protocol":       "SASL_SSL",
+	"ssl.truststore.location": "/opt/benchmark/kafka.truststore.jks",
+	"ssl.truststore.password": "password",
+	"sasl.mechanism":          "PLAIN",
+	"sasl.jaas.config": `org.apache.kafka.common.security.plain.PlainLoginModule required
+	username="client"
+	password="client-secret";`,
+}
+
 func main() {
 	panic("This is not an executable. Build it as a plugin w/ '-buildmode=plugin'")
 }
@@ -39,9 +49,9 @@ type Kafka struct {
 func (k *Kafka) Init(harnessImpl harness.Harness) (scheduler harness.Scheduler, err error) {
 	k.harnessImpl = harnessImpl
 	var adminClient *kafka.AdminClient
-	if adminClient, err = kafka.NewAdminClient(&kafka.ConfigMap{
-		"bootstrap.servers": harnessImpl.Config().BrokerEndpoint,
-	}); err != nil {
+	securityConfig.SetKey("bootstrap.servers", harnessImpl.Config().BrokerEndpoint)
+
+	if adminClient, err = kafka.NewAdminClient(&securityConfig); err != nil {
 		err = errors.Wrap(err, "kafka.NewAdminClient()")
 		return
 	}
@@ -103,9 +113,7 @@ func (k *Kafka) Function() harness.Func {
 				producer.Close()
 			}
 		}()
-		if producer, err = kafka.NewProducer(&kafka.ConfigMap{
-			"bootstrap.servers": k.harnessImpl.Config().BrokerEndpoint,
-		}); err != nil {
+		if producer, err = kafka.NewProducer(&securityConfig); err != nil {
 			err = errors.Wrap(err, "kafka.NewProducer()")
 			return
 		}
