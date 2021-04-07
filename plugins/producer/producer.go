@@ -25,13 +25,12 @@ const (
 var Plugin Kafka
 
 var securityConfig kafka.ConfigMap = kafka.ConfigMap{
-	"security.protocol":       "SASL_SSL",
-	"ssl.truststore.location": "/opt/benchmark/kafka.truststore.jks",
-	"ssl.truststore.password": "password",
-	"sasl.mechanism":          "PLAIN",
-	"sasl.jaas.config": `org.apache.kafka.common.security.plain.PlainLoginModule required
-	username="client"
-	password="client-secret";`,
+	"security.protocol": "SSL",
+	"ssl.ca.location":   "/opt/benchmark/ca.pem",
+	//"sasl.mechanism":    "PLAIN",
+	//"sasl.jaas.config": `org.apache.kafka.common.security.plain.PlainLoginModule required
+	//username="client"
+	//password="client-secret";`,
 }
 
 func main() {
