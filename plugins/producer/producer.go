@@ -15,7 +15,7 @@ const (
 	pluginName                 = "kafka"
 	failedMetric               = "failed"
 	producedMetric             = "produced"
-	defaultTopic               = "topic"
+	defaultTopic               = "topic-other"
 	defaultReplicationFactor   = 3
 	defaultPartitions          = 100
 	defaultMessagesPerProducer = 10
