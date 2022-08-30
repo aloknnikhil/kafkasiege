@@ -142,8 +142,8 @@ func (k *Kafka) Function() harness.Func {
 				return
 			}
 
-			// Flush every 100 messages
-			if i%100 == 0 {
+			// Flush every message
+			if i%1 == 0 {
 				producer.Flush(15 * 1000)
 			}
 		}
