@@ -133,7 +133,7 @@ func (k *Kafka) Function() harness.Func {
 
 		sendToTopic := defaultTopic
 		for i := 0; ; i++ {
-			time.Sleep(time.Second)
+			time.Sleep(1 * time.Second)
 			if err = producer.Produce(&kafka.Message{
 				TopicPartition: kafka.TopicPartition{
 					Topic:     &sendToTopic,
