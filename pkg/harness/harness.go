@@ -2,12 +2,14 @@ package harness
 
 import (
 	"fmt"
+	"io/ioutil"
+
 	"github.com/aloknnikhil/kafkasiege/pkg/config"
 	"github.com/aloknnikhil/kafkasiege/pkg/metrics"
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"log"
+
+	// "log"
 	goplugin "plugin"
 	"reflect"
 	"time"
@@ -118,7 +120,7 @@ func (s *Standard) Run() (err error) {
 		case Default:
 			s.schedule(pluginImpl.Function())
 			for !pluginImpl.Done() {
-				log.Printf("Waiting for %s plugin to finish\n", pluginImpl.Name())
+				// log.Printf("Waiting for %s plugin to finish\n", pluginImpl.Name())
 				time.Sleep(100 * time.Millisecond)
 			}
 		case Custom:

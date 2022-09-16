@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/aloknnikhil/kafkasiege/pkg/harness"
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
-	"log"
-	"time"
 )
 
 const (
@@ -24,8 +25,8 @@ const (
 var Plugin Kafka
 
 var securityConfig kafka.ConfigMap = kafka.ConfigMap{
-	"security.protocol": "SSL",
-	"ssl.ca.location":   "/opt/benchmark/ca.pem",
+	// "security.protocol": "SSL",
+	// "ssl.ca.location":   "/opt/benchmark/ca.pem",
 	//"sasl.mechanism":    "PLAIN",
 	//"sasl.jaas.config": `org.apache.kafka.common.security.plain.PlainLoginModule required
 	//username="client"
@@ -120,10 +121,11 @@ func (k *Kafka) Function() harness.Func {
 			for e := range producer.Events() {
 				switch ev := e.(type) {
 				case *kafka.Message:
+					dt := time.Now()
 					if ev.TopicPartition.Error != nil {
-						log.Printf("[Connection: %d] Delivery failed: %+v\n", connectionId, ev.TopicPartition)
+						log.Printf("[%+v][Connection: %d] Delivery failed: %+v\n", dt.Format(time.UnixDate), connectionId, ev.TopicPartition)
 					} else {
-						log.Printf("[Connection: %d] Delivered message", connectionId)
+						log.Printf("[%+v][Connection: %d] Delivered message", dt.Format(time.UnixDate), connectionId)
 					}
 				}
 			}
@@ -131,10 +133,11 @@ func (k *Kafka) Function() harness.Func {
 
 		sendToTopic := defaultTopic
 		for i := 0; ; i++ {
+			time.Sleep(1 * time.Second)
 			if err = producer.Produce(&kafka.Message{
 				TopicPartition: kafka.TopicPartition{
 					Topic:     &sendToTopic,
-					Partition: kafka.PartitionAny,
+					Partition: 1,
 				},
 				Value: []byte(fmt.Sprintf("%d", i)),
 			}, nil); err != nil {
@@ -162,6 +165,6 @@ func (k *Kafka) Done() bool {
 	connected := k.harnessImpl.Metrics().Get(producedMetric)
 	failed := k.harnessImpl.Metrics().Get(failedMetric)
 	remaining := k.harnessImpl.Config().Connections - uint64(connected+failed)
-	log.Printf("Waiting on %d producers to complete\n", remaining)
+	// log.Printf("Waiting on %d producers to complete\n", remaining)
 	return remaining == 0
 }
