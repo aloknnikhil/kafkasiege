@@ -47,43 +47,43 @@ type Kafka struct {
 
 func (k *Kafka) Init(harnessImpl harness.Harness) (scheduler harness.Scheduler, err error) {
 	k.harnessImpl = harnessImpl
-	var adminClient *kafka.AdminClient
+// 	var adminClient *kafka.AdminClient
 	securityConfig.SetKey("bootstrap.servers", harnessImpl.Config().BrokerEndpoint)
 
-	if adminClient, err = kafka.NewAdminClient(&securityConfig); err != nil {
-		err = errors.Wrap(err, "kafka.NewAdminClient()")
-		return
-	}
+// 	if adminClient, err = kafka.NewAdminClient(&securityConfig); err != nil {
+// 		err = errors.Wrap(err, "kafka.NewAdminClient()")
+// 		return
+// 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+// 	ctx, cancel := context.WithCancel(context.Background())
+// 	defer cancel()
 
-	maxDur, err := time.ParseDuration("60s")
-	if err != nil {
-		err = errors.Wrap(err, "time.ParseDuration(60s)")
-		return
-	}
+// 	maxDur, err := time.ParseDuration("60s")
+// 	if err != nil {
+// 		err = errors.Wrap(err, "time.ParseDuration(60s)")
+// 		return
+// 	}
 
 	// Attempt to delete the topic if it already exists
-	_, err = adminClient.DeleteTopics(
-		ctx, []string{defaultTopic}, kafka.SetAdminOperationTimeout(maxDur))
-	log.Printf("[WARN] - Failed to delete topic: %s\n", defaultTopic)
+// 	_, err = adminClient.DeleteTopics(
+// 		ctx, []string{defaultTopic}, kafka.SetAdminOperationTimeout(maxDur))
+// 	log.Printf("[WARN] - Failed to delete topic: %s\n", defaultTopic)
 
-	creates, err := adminClient.CreateTopics(
-		ctx,
-		[]kafka.TopicSpecification{{
-			Topic:             defaultTopic,
-			NumPartitions:     defaultPartitions,
-			ReplicationFactor: defaultReplicationFactor}},
-		kafka.SetAdminOperationTimeout(maxDur))
-	if err != nil {
-		err = errors.Wrapf(err, "[FATAL] Failed to create topic: %s\n", defaultTopic)
-		return
-	}
+// 	creates, err := adminClient.CreateTopics(
+// 		ctx,
+// 		[]kafka.TopicSpecification{{
+// 			Topic:             defaultTopic,
+// 			NumPartitions:     defaultPartitions,
+// 			ReplicationFactor: defaultReplicationFactor}},
+// 		kafka.SetAdminOperationTimeout(maxDur))
+// 	if err != nil {
+// 		err = errors.Wrapf(err, "[FATAL] Failed to create topic: %s\n", defaultTopic)
+// 		return
+// 	}
 
-	for _, create := range creates {
-		fmt.Printf("Created: %s\n", create)
-	}
+// 	for _, create := range creates {
+// 		fmt.Printf("Created: %s\n", create)
+// 	}
 
 	return
 }
